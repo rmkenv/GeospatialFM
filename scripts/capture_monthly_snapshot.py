@@ -4,11 +4,13 @@ Monthly Geospatial Company Stock Snapshot Capture Script
 
 This script:
 1. Reads the geospatial companies data from parquet file
-2. Fetches historical stock data for the past month using yfinance
+2. Fetches historical stock data using yfinance
 3. Calculates monthly activity metrics (open, close, high, low, volume, % change)
-4. Creates a timestamped snapshot
-5. Saves snapshot to GitHub repository in year-based folder structure
-6. Uploads the snapshot to pCloud public upload link
+4. Calculates multi-period performance metrics (3mo, 6mo, YTD, 1yr, 5yr)
+   - Percentage change, high, low, average, volume, volatility for each period
+5. Creates a timestamped snapshot with comprehensive metrics
+6. Saves snapshot to GitHub repository in year-based folder structure
+7. Uploads the snapshot to pCloud public upload link
 """
 
 import os
@@ -35,6 +37,57 @@ def load_company_data(parquet_path: str = "geospatial_companies_cleaned.parquet"
     return df
 
 
+def calculate_period_metrics(hist_data: pd.DataFrame, period_name: str) -> Dict:
+    """
+    Calculate performance metrics for a given period of historical data.
+    
+    Args:
+        hist_data: DataFrame with historical stock data
+        period_name: Name of the period (e.g., '3mo', '6mo', 'ytd', '1yr', '5yr')
+    
+    Returns:
+        Dictionary with calculated metrics for the period
+    """
+    if hist_data.empty or len(hist_data) < 2:
+        return {
+            f'pct_change_{period_name}': None,
+            f'high_{period_name}': None,
+            f'low_{period_name}': None,
+            f'avg_{period_name}': None,
+            f'volume_{period_name}': None,
+            f'volatility_{period_name}': None,
+        }
+    
+    try:
+        start_price = float(hist_data.iloc[0]['Close'])
+        end_price = float(hist_data.iloc[-1]['Close'])
+        
+        # Calculate percentage change
+        if start_price > 0:
+            pct_change = ((end_price - start_price) / start_price) * 100
+        else:
+            pct_change = 0.0
+        
+        return {
+            f'pct_change_{period_name}': round(pct_change, 2),
+            f'high_{period_name}': round(float(hist_data['High'].max()), 2),
+            f'low_{period_name}': round(float(hist_data['Low'].min()), 2),
+            f'avg_{period_name}': round(float(hist_data['Close'].mean()), 2),
+            f'volume_{period_name}': int(hist_data['Volume'].sum()),
+            f'volatility_{period_name}': round(float(hist_data['Close'].std()), 2),
+        }
+    except Exception as e:
+        print(f"    Warning: Error calculating {period_name} metrics: {e}")
+        return {
+            f'pct_change_{period_name}': None,
+            f'high_{period_name}': None,
+            f'low_{period_name}': None,
+            f'avg_{period_name}': None,
+            f'volume_{period_name}': None,
+            f'volatility_{period_name}': None,
+        }
+
+
 def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
     """
     Fetch monthly stock data for given tickers using yfinance.
@@ -44,17 +97,28 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
     - Monthly high and low
     - Total trading volume
     - Percentage change over the month
+    
+    Also calculates multi-period performance metrics:
+    - 3 months, 6 months, YTD, 1 year, 5 years
     """
-    print(f"\nFetching monthly stock data for {len(tickers)} tickers...")
+    print(f"\nFetching stock data with multi-period metrics for {len(tickers)} tickers...")
     
     stock_data = {}
     failed_tickers = []
     
-    # Calculate date range for the past month
+    # Calculate date ranges for different periods
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=35)  # Get a bit more than a month to ensure we have data
     
-    print(f"Fetching data from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+    # For monthly data
+    monthly_start = end_date - timedelta(days=35)
+    
+    # For multi-period data (fetch 5+ years to cover all periods)
+    multi_period_start = end_date - timedelta(days=365 * 6)  # 6 years to be safe
+    
+    # Calculate YTD start date (January 1st of current year)
+    ytd_start = datetime(end_date.year, 1, 1)
+    
+    print(f"Fetching historical data from {multi_period_start.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
     
     for i, ticker in enumerate(tickers, 1):
         try:
@@ -63,31 +127,26 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
             stock = yf.Ticker(ticker)
             info = stock.info
             
-            # Fetch historical data for the past month
-            hist = stock.history(start=start_date, end=end_date)
+            # Fetch extended historical data for multi-period analysis
+            hist_full = stock.history(start=multi_period_start, end=end_date)
             
-            if hist.empty:
+            if hist_full.empty:
                 print("❌ No data")
                 failed_tickers.append(ticker)
                 continue
             
-            # Get the most recent month's data
-            # Filter to get only the last complete month or current month
-            current_month = end_date.month
-            current_year = end_date.year
-            
-            # Try to get data for the current month
-            month_data = hist[
-                (hist.index.month == current_month) & 
-                (hist.index.year == current_year)
+            # Get monthly data (last month)
+            month_data = hist_full[
+                (hist_full.index.month == end_date.month) & 
+                (hist_full.index.year == end_date.year)
             ]
             
             # If current month has less than 5 trading days, use previous month
             if len(month_data) < 5:
                 prev_month_date = end_date.replace(day=1) - timedelta(days=1)
-                month_data = hist[
-                    (hist.index.month == prev_month_date.month) & 
-                    (hist.index.year == prev_month_date.year)
+                month_data = hist_full[
+                    (hist_full.index.month == prev_month_date.month) & 
+                    (hist_full.index.year == prev_month_date.year)
                 ]
             
             if month_data.empty:
@@ -109,12 +168,29 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
                 monthly_pct_change = 0.0
             
             # Get current/latest data
-            latest = hist.iloc[-1]
+            latest = hist_full.iloc[-1]
             
-            # Calculate additional metrics
+            # Calculate additional monthly metrics
             monthly_avg_price = float(month_data['Close'].mean())
             monthly_volatility = float(month_data['Close'].std())
             trading_days = len(month_data)
+            
+            # Calculate multi-period metrics
+            # Define period start dates
+            periods = {
+                '3mo': end_date - timedelta(days=90),
+                '6mo': end_date - timedelta(days=180),
+                'ytd': ytd_start,
+                '1yr': end_date - timedelta(days=365),
+                '5yr': end_date - timedelta(days=365 * 5),
+            }
+            
+            # Calculate metrics for each period
+            period_metrics = {}
+            for period_name, period_start in periods.items():
+                period_data = hist_full[hist_full.index >= period_start]
+                metrics = calculate_period_metrics(period_data, period_name)
+                period_metrics.update(metrics)
             
             stock_data[ticker] = {
                 'ticker': ticker,
@@ -134,6 +210,9 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
                 'monthly_avg_price': round(monthly_avg_price, 2),
                 'monthly_volatility': round(monthly_volatility, 2),
                 'trading_days_in_month': trading_days,
+                
+                # Multi-period performance metrics
+                **period_metrics,
                 
                 # Company information
                 'market_cap': info.get('marketCap'),
@@ -395,7 +474,7 @@ def main():
     """Main execution function."""
     print("=" * 60)
     print("Geospatial Company Stock Snapshot Capture")
-    print("With Monthly Activity Metrics")
+    print("With Monthly Activity & Multi-Period Performance Metrics")
     print("=" * 60)
     print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 60)
