@@ -94,11 +94,24 @@ def create_snapshot(company_df: pd.DataFrame, stock_data: Dict[str, Dict]) -> pd
     # Convert stock data to DataFrame
     stock_df = pd.DataFrame.from_dict(stock_data, orient='index')
     
-    # Merge with company data (assuming company_df has a 'ticker' column)
-    if 'ticker' in company_df.columns:
+    # Determine ticker column name (use YahooSymbolClean, fallback to symbol)
+    ticker_col = None
+    if 'YahooSymbolClean' in company_df.columns:
+        ticker_col = 'YahooSymbolClean'
+    elif 'symbol' in company_df.columns:
+        ticker_col = 'symbol'
+    elif 'ticker' in company_df.columns:
+        ticker_col = 'ticker'
+    
+    # Merge with company data if ticker column exists
+    if ticker_col:
+        # Create a temporary column in stock_df to match company_df ticker column
+        stock_df_copy = stock_df.copy()
+        stock_df_copy[ticker_col] = stock_df_copy['ticker']
+        
         snapshot_df = company_df.merge(
-            stock_df, 
-            on='ticker', 
+            stock_df_copy, 
+            on=ticker_col, 
             how='left',
             suffixes=('_original', '_current')
         )
@@ -183,16 +196,23 @@ def main():
         # 1. Load company data
         company_df = load_company_data()
         
-        # 2. Extract tickers (adjust column name if needed)
-        if 'ticker' in company_df.columns:
-            tickers = company_df['ticker'].dropna().unique().tolist()
+        # 2. Extract tickers (use YahooSymbolClean, fallback to symbol, then ticker)
+        ticker_col = None
+        if 'YahooSymbolClean' in company_df.columns:
+            ticker_col = 'YahooSymbolClean'
+        elif 'symbol' in company_df.columns:
+            ticker_col = 'symbol'
+        elif 'ticker' in company_df.columns:
+            ticker_col = 'ticker'
         elif 'Ticker' in company_df.columns:
-            tickers = company_df['Ticker'].dropna().unique().tolist()
+            ticker_col = 'Ticker'
         else:
             # Try to find any column that might contain tickers
             print("\nAvailable columns:", company_df.columns.tolist())
             raise ValueError("Could not find ticker column in data")
         
+        print(f"Using ticker column: {ticker_col}")
+        tickers = company_df[ticker_col].dropna().unique().tolist()
         print(f"Found {len(tickers)} unique tickers")
         
         # 3. Fetch stock data
