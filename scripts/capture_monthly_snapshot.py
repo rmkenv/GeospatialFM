@@ -302,6 +302,68 @@ def create_snapshot(company_df: pd.DataFrame, stock_data: Dict[str, Dict]) -> pd
     return snapshot_df
 
 
+def clean_dataframe_for_parquet(snapshot_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Comprehensive data cleaning for Parquet compatibility.
+    Handles infinity values, NaN strings, and ensures proper numeric types.
+    """
+    import numpy as np
+    
+    snapshot_df_clean = snapshot_df.copy()
+    
+    print(f"  Cleaning data for Parquet export...")
+    
+    # Step 1: Replace string representations of infinity/NaN in ALL columns
+    # This catches "Infinity", "-Infinity", "inf", "-inf" as strings
+    snapshot_df_clean.replace(["Infinity", "-Infinity", "inf", "-inf", "NaN", "nan"], np.nan, inplace=True)
+    
+    # Step 2: Define ALL numeric columns (including multi-period metrics)
+    base_numeric_columns = [
+        'current_price', 'current_volume', 'monthly_open', 'monthly_close',
+        'monthly_high', 'monthly_low', 'monthly_volume', 'monthly_pct_change',
+        'monthly_avg_price', 'monthly_volatility', 'trading_days_in_month',
+        'market_cap', 'pe_ratio', 'dividend_yield', 'beta', 
+        'fifty_two_week_high', 'fifty_two_week_low'
+    ]
+    
+    # Add multi-period metric columns for all periods
+    periods = ['3mo', '6mo', 'ytd', '1yr', '5yr']
+    metric_types = ['pct_change', 'high', 'low', 'avg', 'volume', 'volatility']
+    
+    multi_period_columns = [
+        f'{metric}_{period}' 
+        for period in periods 
+        for metric in metric_types
+    ]
+    
+    all_numeric_columns = base_numeric_columns + multi_period_columns
+    
+    # Step 3: Convert all numeric columns to proper numeric types and replace inf/nan
+    cleaned_count = 0
+    for col in all_numeric_columns:
+        if col in snapshot_df_clean.columns:
+            # Convert to numeric, coercing errors to NaN
+            snapshot_df_clean[col] = pd.to_numeric(snapshot_df_clean[col], errors='coerce')
+            
+            # Replace any remaining inf/-inf with NaN
+            inf_mask = np.isinf(snapshot_df_clean[col])
+            if inf_mask.any():
+                cleaned_count += inf_mask.sum()
+                snapshot_df_clean.loc[inf_mask, col] = np.nan
+    
+    if cleaned_count > 0:
+        print(f"  ✓ Cleaned {cleaned_count} infinity values across all numeric columns")
+    
+    # Step 4: Final safety check - scan for any remaining problematic values
+    for col in snapshot_df_clean.select_dtypes(include=[np.number]).columns:
+        if snapshot_df_clean[col].isin([np.inf, -np.inf]).any():
+            print(f"  ⚠ Warning: Column '{col}' still contains infinity values, replacing...")
+            snapshot_df_clean[col].replace([np.inf, -np.inf], np.nan, inplace=True)
+    
+    print(f"  ✓ Data cleaned successfully")
+    return snapshot_df_clean
+
+
 def save_snapshot_to_github(snapshot_df: pd.DataFrame) -> str:
     """
     Save snapshot to GitHub repository in year-based folder structure.
@@ -320,23 +382,8 @@ def save_snapshot_to_github(snapshot_df: pd.DataFrame) -> str:
     filename = f"snapshot_{date_str}.parquet"
     filepath = snapshots_dir / filename
     
-    # Clean data before writing to Parquet
-    # Replace "Infinity" and "-Infinity" strings with NaN in all columns
-    import numpy as np
-    snapshot_df_clean = snapshot_df.copy()
-    snapshot_df_clean.replace(["Infinity", "-Infinity", "inf", "-inf"], np.nan, inplace=True)
-    
-    # Ensure numeric columns have proper numeric types
-    numeric_columns = [
-        'current_price', 'current_volume', 'monthly_open', 'monthly_close',
-        'monthly_high', 'monthly_low', 'monthly_volume', 'monthly_pct_change',
-        'monthly_avg_price', 'monthly_volatility', 'market_cap', 'pe_ratio',
-        'dividend_yield', 'beta', 'fifty_two_week_high', 'fifty_two_week_low'
-    ]
-    
-    for col in numeric_columns:
-        if col in snapshot_df_clean.columns:
-            snapshot_df_clean[col] = pd.to_numeric(snapshot_df_clean[col], errors='coerce')
+    # Clean data before writing to Parquet using comprehensive cleaning function
+    snapshot_df_clean = clean_dataframe_for_parquet(snapshot_df)
     
     # Save to parquet
     snapshot_df_clean.to_parquet(filepath, index=False)
@@ -357,23 +404,8 @@ def save_snapshot_local(snapshot_df: pd.DataFrame) -> str:
     filename = f"geospatial_stocks_snapshot_{timestamp}.parquet"
     filepath = snapshots_dir / filename
     
-    # Clean data before writing to Parquet
-    # Replace "Infinity" and "-Infinity" strings with NaN in all columns
-    import numpy as np
-    snapshot_df_clean = snapshot_df.copy()
-    snapshot_df_clean.replace(["Infinity", "-Infinity", "inf", "-inf"], np.nan, inplace=True)
-    
-    # Ensure numeric columns have proper numeric types
-    numeric_columns = [
-        'current_price', 'current_volume', 'monthly_open', 'monthly_close',
-        'monthly_high', 'monthly_low', 'monthly_volume', 'monthly_pct_change',
-        'monthly_avg_price', 'monthly_volatility', 'market_cap', 'pe_ratio',
-        'dividend_yield', 'beta', 'fifty_two_week_high', 'fifty_two_week_low'
-    ]
-    
-    for col in numeric_columns:
-        if col in snapshot_df_clean.columns:
-            snapshot_df_clean[col] = pd.to_numeric(snapshot_df_clean[col], errors='coerce')
+    # Clean data before writing to Parquet using comprehensive cleaning function
+    snapshot_df_clean = clean_dataframe_for_parquet(snapshot_df)
     
     # Save to parquet
     snapshot_df_clean.to_parquet(filepath, index=False)
