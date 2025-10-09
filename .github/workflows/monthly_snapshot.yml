@@ -1,10 +1,9 @@
-name: Monthly Geospatial Stock Snapshot
+name: Weekly Geospatial Stock Snapshot
 
 on:
   schedule:
-    # Run at 4 PM UTC on the last day of each month
-    # This typically captures the last business day for most markets
-    - cron: '0 16 28-31 * *'
+    # Run every Friday at 8 PM EST (1 AM UTC Saturday, since EST is UTC-5)
+    - cron: '0 1 * * 6'
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -13,58 +12,28 @@ permissions:
 jobs:
   capture-snapshot:
     runs-on: ubuntu-latest
-  
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+    
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-        
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        
-      - name: Check if today is last business day
-        id: check_date
-        run: |
-          python -c "
-          from datetime import datetime, timedelta
-          import calendar
-        
-          today = datetime.now()
-        
-          # Get last day of current month
-          last_day = calendar.monthrange(today.year, today.month)[1]
-          last_date = datetime(today.year, today.month, last_day)
-        
-          # Find last business day (Mon-Fri)
-          while last_date.weekday() > 4:  # 5=Sat, 6=Sun
-              last_date -= timedelta(days=1)
-        
-          is_last_business_day = today.date() == last_date.date()
-          print(f'is_last_business_day={is_last_business_day}')
-          print(f'IS_LAST_BUSINESS_DAY={is_last_business_day}' if is_last_business_day else 'IS_LAST_BUSINESS_DAY=false')
-        
-          # For workflow_dispatch, always run
-          if '${{ github.event_name }}' == 'workflow_dispatch':
-              print('IS_LAST_BUSINESS_DAY=true')
-          " >> $GITHUB_OUTPUT
-        
-      - name: Capture monthly snapshot
-        if: steps.check_date.outputs.IS_LAST_BUSINESS_DAY == 'true' || github.event_name == 'workflow_dispatch'
-        env:
-          PCLOUD_UPLOAD_URL: https://u.pcloud.link/publink/show?code=kZtoYn5ZDdykWL0Leih0Q0bL8Uyz0hdsQGBy
+      
+      - name: Capture weekly snapshot
         run: |
           python scripts/capture_monthly_snapshot.py
-        
-      - name: Upload artifact (backup)
-        if: steps.check_date.outputs.IS_LAST_BUSINESS_DAY == 'true' || github.event_name == 'workflow_dispatch'
+      
+      - name: Upload Parquet artifact
         uses: actions/upload-artifact@v4
         with:
-          name: monthly-snapshot-${{ github.run_number }}
+          name: weekly-snapshot-${{ github.run_number }}
           path: snapshots/*.parquet
           retention-days: 90
