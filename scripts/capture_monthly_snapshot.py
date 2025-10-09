@@ -320,8 +320,26 @@ def save_snapshot_to_github(snapshot_df: pd.DataFrame) -> str:
     filename = f"snapshot_{date_str}.parquet"
     filepath = snapshots_dir / filename
     
+    # Clean data before writing to Parquet
+    # Replace "Infinity" and "-Infinity" strings with NaN in all columns
+    import numpy as np
+    snapshot_df_clean = snapshot_df.copy()
+    snapshot_df_clean.replace(["Infinity", "-Infinity", "inf", "-inf"], np.nan, inplace=True)
+    
+    # Ensure numeric columns have proper numeric types
+    numeric_columns = [
+        'current_price', 'current_volume', 'monthly_open', 'monthly_close',
+        'monthly_high', 'monthly_low', 'monthly_volume', 'monthly_pct_change',
+        'monthly_avg_price', 'monthly_volatility', 'market_cap', 'pe_ratio',
+        'dividend_yield', 'beta', 'fifty_two_week_high', 'fifty_two_week_low'
+    ]
+    
+    for col in numeric_columns:
+        if col in snapshot_df_clean.columns:
+            snapshot_df_clean[col] = pd.to_numeric(snapshot_df_clean[col], errors='coerce')
+    
     # Save to parquet
-    snapshot_df.to_parquet(filepath, index=False)
+    snapshot_df_clean.to_parquet(filepath, index=False)
     print(f"\nSnapshot saved to GitHub path: {filepath}")
     print(f"File size: {filepath.stat().st_size / 1024:.2f} KB")
     
@@ -339,8 +357,26 @@ def save_snapshot_local(snapshot_df: pd.DataFrame) -> str:
     filename = f"geospatial_stocks_snapshot_{timestamp}.parquet"
     filepath = snapshots_dir / filename
     
+    # Clean data before writing to Parquet
+    # Replace "Infinity" and "-Infinity" strings with NaN in all columns
+    import numpy as np
+    snapshot_df_clean = snapshot_df.copy()
+    snapshot_df_clean.replace(["Infinity", "-Infinity", "inf", "-inf"], np.nan, inplace=True)
+    
+    # Ensure numeric columns have proper numeric types
+    numeric_columns = [
+        'current_price', 'current_volume', 'monthly_open', 'monthly_close',
+        'monthly_high', 'monthly_low', 'monthly_volume', 'monthly_pct_change',
+        'monthly_avg_price', 'monthly_volatility', 'market_cap', 'pe_ratio',
+        'dividend_yield', 'beta', 'fifty_two_week_high', 'fifty_two_week_low'
+    ]
+    
+    for col in numeric_columns:
+        if col in snapshot_df_clean.columns:
+            snapshot_df_clean[col] = pd.to_numeric(snapshot_df_clean[col], errors='coerce')
+    
     # Save to parquet
-    snapshot_df.to_parquet(filepath, index=False)
+    snapshot_df_clean.to_parquet(filepath, index=False)
     print(f"\nLocal snapshot saved to: {filepath}")
     print(f"File size: {filepath.stat().st_size / 1024:.2f} KB")
     
