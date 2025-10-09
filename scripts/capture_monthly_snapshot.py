@@ -135,6 +135,11 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
                 failed_tickers.append(ticker)
                 continue
             
+            # Convert timezone-aware index to timezone-naive for comparisons
+            # yfinance returns timezone-aware datetimes (America/New_York)
+            if hist_full.index.tz is not None:
+                hist_full.index = hist_full.index.tz_localize(None)
+            
             # Get monthly data (last month)
             month_data = hist_full[
                 (hist_full.index.month == end_date.month) & 
