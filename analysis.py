@@ -119,6 +119,9 @@ def _download_hist_for_period(symbols, start, end):
     logging.info(f"Downloading {len(symbols)} symbols from {start.date()} to {end.date()}...")
     df = yf.download(list(symbols), start=start, end=end, group_by="ticker", progress=False, threads=False)
 
+    # Normalize datetime index to date-only format (removes timezone and time)
+    df.index = df.index.normalize()
+
     # Keep only Close to reduce memory
     if isinstance(df.columns, pd.MultiIndex):
         close_cols = [(sym, "Close") for sym in symbols if (sym, "Close") in df.columns]
@@ -160,7 +163,8 @@ def _pick_close_at(hist_df, yf_symbol, when):
     if series.empty:
         return None
     idx = series.index
-    pos = np.argmin(np.abs(idx - pd.Timestamp(when)))
+    # Normalize the comparison timestamp to match the normalized index
+    pos = np.argmin(np.abs(idx - pd.Timestamp(when).normalize()))
     return float(series.iloc[pos])
 
 # ================================================================
