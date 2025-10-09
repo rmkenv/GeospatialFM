@@ -137,8 +137,11 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
             
             # Convert timezone-aware index to timezone-naive for comparisons
             # yfinance returns timezone-aware datetimes (America/New_York)
+            # We need to remove timezone info to allow comparisons with timezone-naive datetime objects
             if hist_full.index.tz is not None:
-                hist_full.index = hist_full.index.tz_localize(None)
+                # Use tz_convert to UTC first, then remove timezone info
+                # This ensures consistent behavior across pandas versions
+                hist_full.index = hist_full.index.tz_convert('UTC').tz_localize(None)
             
             # Get monthly data (last month)
             month_data = hist_full[
@@ -181,7 +184,7 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
             trading_days = len(month_data)
             
             # Calculate multi-period metrics
-            # Define period start dates
+            # Define period start dates (all timezone-naive)
             periods = {
                 '3mo': end_date - timedelta(days=90),
                 '6mo': end_date - timedelta(days=180),
@@ -190,9 +193,19 @@ def fetch_monthly_stock_data(tickers: List[str]) -> Dict[str, Dict]:
                 '5yr': end_date - timedelta(days=365 * 5),
             }
             
+            # Double-check that hist_full.index is timezone-naive before comparisons
+            # This is a safety check in case the earlier conversion didn't work
+            if hist_full.index.tz is not None:
+                print(f"    Warning: Index still has timezone {hist_full.index.tz}, converting...")
+                hist_full.index = hist_full.index.tz_convert('UTC').tz_localize(None)
+            
             # Calculate metrics for each period
             period_metrics = {}
             for period_name, period_start in periods.items():
+                # Ensure period_start is timezone-naive (it should be, but double-check)
+                if hasattr(period_start, 'tz') and period_start.tz is not None:
+                    period_start = period_start.tz_localize(None)
+                
                 period_data = hist_full[hist_full.index >= period_start]
                 metrics = calculate_period_metrics(period_data, period_name)
                 period_metrics.update(metrics)
