@@ -29,7 +29,7 @@ jobs:
       
       - name: Capture weekly snapshot
         run: |
-          python scripts/capture_monthly_snapshot.py
+          python scripts/capture_snapshot.py
       
       - name: Upload Parquet artifact
         uses: actions/upload-artifact@v4
