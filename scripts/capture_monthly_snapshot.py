@@ -10,7 +10,6 @@ This script:
    - Percentage change, high, low, average, volume, volatility for each period
 5. Creates a timestamped snapshot with comprehensive metrics
 6. Saves snapshot to GitHub repository in year-based folder structure
-7. Uploads the snapshot to pCloud public upload link
 """
 
 import os
@@ -20,8 +19,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import pandas as pd
 import yfinance as yf
-import requests
-import json
 from typing import Dict, List, Optional
 
 
@@ -394,7 +391,7 @@ def save_snapshot_to_github(snapshot_df: pd.DataFrame) -> str:
 
 
 def save_snapshot_local(snapshot_df: pd.DataFrame) -> str:
-    """Save snapshot to local snapshots directory with timestamp (for pCloud upload)."""
+    """Save snapshot to local snapshots directory with timestamp (for GitHub Actions artifacts)."""
     # Create snapshots directory
     snapshots_dir = Path("snapshots")
     snapshots_dir.mkdir(exist_ok=True)
@@ -514,48 +511,6 @@ def commit_and_push_to_github(filepath: str) -> bool:
         return False
 
 
-def upload_to_pcloud(filepath: str, upload_url: str) -> bool:
-    """Upload snapshot file to pCloud public upload link."""
-    print(f"\nUploading to pCloud...")
-    
-    try:
-        # Extract the upload code from the URL
-        if "code=" in upload_url:
-            code = upload_url.split("code=")[1].split("&")[0]
-        else:
-            raise ValueError("Invalid pCloud upload URL format")
-        
-        # pCloud public upload API endpoint
-        api_url = f"https://api.pcloud.com/uploadtolink"
-        
-        # Prepare the file
-        filename = Path(filepath).name
-        
-        with open(filepath, 'rb') as f:
-            files = {'file': (filename, f, 'application/octet-stream')}
-            params = {'code': code}
-            
-            print(f"  Uploading {filename}...")
-            response = requests.post(api_url, params=params, files=files, timeout=300)
-            
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('result') == 0:
-                    print("  ✓ Upload successful!")
-                    print(f"  File ID: {result.get('metadata', [{}])[0].get('fileid', 'N/A')}")
-                    return True
-                else:
-                    print(f"  ❌ Upload failed: {result.get('error', 'Unknown error')}")
-                    return False
-            else:
-                print(f"  ❌ HTTP Error {response.status_code}: {response.text}")
-                return False
-                
-    except Exception as e:
-        print(f"  ❌ Upload error: {str(e)}")
-        return False
-
-
 def main():
     """Main execution function."""
     print("=" * 60)
@@ -604,16 +559,8 @@ def main():
         # 6. Commit and push to GitHub
         github_success = commit_and_push_to_github(github_filepath)
         
-        # 7. Save local copy for pCloud upload
+        # 7. Save local copy for GitHub Actions artifacts
         local_filepath = save_snapshot_local(snapshot_df)
-        
-        # 8. Upload to pCloud
-        pcloud_success = False
-        upload_url = os.environ.get('PCLOUD_UPLOAD_URL')
-        if upload_url:
-            pcloud_success = upload_to_pcloud(local_filepath, upload_url)
-        else:
-            print("\n⚠ PCLOUD_UPLOAD_URL not set, skipping pCloud upload")
         
         # Summary
         print("\n" + "=" * 60)
@@ -622,8 +569,7 @@ def main():
         print(f"✓ Snapshot created with {len(snapshot_df)} records")
         print(f"✓ Monthly metrics calculated for {len(stock_data)} stocks")
         print(f"{'✓' if github_success else '❌'} GitHub storage: {github_filepath}")
-        if upload_url:
-            print(f"{'✓' if pcloud_success else '❌'} pCloud upload: {local_filepath}")
+        print(f"✓ Local artifact: {local_filepath}")
         print("=" * 60)
         
         if github_success:
