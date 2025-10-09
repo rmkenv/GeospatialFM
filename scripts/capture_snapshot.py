@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Monthly Geospatial Company Stock Snapshot Capture Script
+ Geospatial Company Stock Snapshot Capture Script
 
 This script:
 1. Reads the geospatial companies data from parquet file
