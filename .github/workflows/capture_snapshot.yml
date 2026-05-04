@@ -1,39 +1,121 @@
-name: Weekly Geospatial Stock Snapshot
+name: GeospatialFM Weekly Pipeline
 
 on:
   schedule:
-    # Run every Friday at 8 PM EST (1 AM UTC Saturday, since EST is UTC-5)
-    - cron: '0 1 * * 6'
-  workflow_dispatch:  # Allow manual triggering
+    - cron: '0 2 * * 6'
+  workflow_dispatch:
+    inputs:
+      skip_newsletter:
+        description: 'Skip newsletter generation (true/false)'
+        required: false
+        default: 'false'
+      skip_13f:
+        description: 'Skip 13F filing fetch (true/false)'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
 
-jobs:
-  capture-snapshot:
-    runs-on: ubuntu-latest
+env:
+  PYTHON_VERSION: '3.11'
 
+jobs:
+  snapshot:
+    name: "Capture Market Snapshot"
+    runs-on: ubuntu-latest
+    outputs:
+      snapshot_path: ${{ steps.capture.outputs.snapshot_path }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-    
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
-      - name: Capture weekly snapshot
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Capture snapshot
+        id: capture
         run: |
           python scripts/capture_snapshot.py
-      
-      - name: Upload Parquet artifact
-        uses: actions/upload-artifact@v4
+          LATEST=$(find snapshots -name "*.parquet" | sort | tail -1)
+          echo "snapshot_path=$LATEST" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
         with:
           name: weekly-snapshot-${{ github.run_number }}
-          path: snapshots/*.parquet
+          path: snapshots/
           retention-days: 90
+      - name: Commit snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/
+          git diff --cached --quiet || git commit -m "chore: snapshot $(date -u +%Y-%m-%d)"
+          git push
+
+  filings:
+    name: "Fetch 13F Filings"
+    runs-on: ubuntu-latest
+    needs: snapshot
+    if: ${{ github.event.inputs.skip_13f != 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Fetch 13F filings
+        run: |
+          python scripts/fetch_13f_filings.py \
+            --universe geospatial_companies_cleaned.parquet \
+            --output-dir filings/13f \
+            --lookback-days 90 \
+            --max-filings 50
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 13f-filings-${{ github.run_number }}
+          path: filings/
+          retention-days: 180
+      - name: Commit 13F data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add filings/
+          git diff --cached --quiet || git commit -m "chore: 13f filings $(date -u +%Y-%m-%d)"
+          git push
+
+  newsletter:
+    name: "Generate Newsletter"
+    runs-on: ubuntu-latest
+    needs: [snapshot, filings]
+    if: always() && needs.snapshot.result == 'success' && github.event.inputs.skip_newsletter != 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: git pull --rebase origin main
+      - name: Generate newsletter
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+        run: |
+          python scripts/generate_newsletter.py \
+            --snapshot "${{ needs.snapshot.outputs.snapshot_path }}" \
+            --output-dir newsletters \
+            --filings-dir filings/13f
+      - uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-${{ github.run_number }}
+          path: newsletters/
+          retention-days: 365
+      - name: Commit newsletter
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add newsletters/
+          git diff --cached --quiet || git commit -m "feat: newsletter $(date -u +%Y-%m-%d)"
+          git push
