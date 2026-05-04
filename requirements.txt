@@ -1,13 +1,14 @@
-
 # Core data processing
 pandas>=2.0.0
 pyarrow>=12.0.0
+numpy>=1.24.0
 
 # Stock data fetching
 yfinance>=0.2.28
 
-# HTTP requests for pCloud upload
+# HTTP (EDGAR + Ollama Cloud)
 requests>=2.31.0
+urllib3>=2.0.0
 
-# Additional utilities
+# Utilities
 python-dateutil>=2.8.2
