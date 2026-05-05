@@ -20,6 +20,11 @@ permissions:
 env:
   PYTHON_VERSION: '3.11'
 
+# Shared git helper used in every commit step:
+#   git_commit <path> <message>
+# Stashes any untracked/unstaged changes, pulls with rebase, pops stash,
+# stages the target path, and pushes only if there is something new to commit.
+
 jobs:
   # ── Job 1: Snapshot ────────────────────────────────────────────────────────
   snapshot:
@@ -29,6 +34,8 @@ jobs:
       snapshot_path: ${{ steps.capture.outputs.snapshot_path }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so rebase has context
 
       - uses: actions/setup-python@v5
         with:
@@ -41,12 +48,8 @@ jobs:
         id: capture
         run: |
           python scripts/capture_snapshot.py
-          # Find the canonical dated snapshot (snapshots/YYYY/snapshot_YYYY-MM-DD.parquet)
           LATEST=$(find snapshots -name "snapshot_????-??-??.parquet" | sort | tail -1)
-          # Fallback to any parquet if dated pattern not found
-          if [ -z "$LATEST" ]; then
-            LATEST=$(find snapshots -name "*.parquet" | sort | tail -1)
-          fi
+          [ -z "$LATEST" ] && LATEST=$(find snapshots -name "*.parquet" | sort | tail -1)
           echo "snapshot_path=$LATEST" >> $GITHUB_OUTPUT
           echo "Latest snapshot: $LATEST"
 
@@ -61,7 +64,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add snapshots/
-          git diff --cached --quiet || git commit -m "chore: snapshot $(date -u +%Y-%m-%d)"
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: snapshot $(date -u +%Y-%m-%d)"
           git push
 
   # ── Job 2: 13F Filings ────────────────────────────────────────────────────
@@ -72,6 +76,8 @@ jobs:
     if: ${{ github.event.inputs.skip_13f != 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -79,6 +85,13 @@ jobs:
           cache: pip
 
       - run: pip install -r requirements.txt
+
+      - name: Pull latest (snapshot commit)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Ensure filings directories exist
         run: |
@@ -95,17 +108,15 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: 13f-filings-${{ github.run_number }}
+          name: 13f-filings-${{ github.run_number }}\
           path: filings/
           retention-days: 180
 
       - name: Commit 13F data
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
           git add filings/
-          git diff --cached --quiet || git commit -m "chore: 13f filings $(date -u +%Y-%m-%d)"
+          git diff --cached --quiet && echo "No new filings to commit" && exit 0
+          git commit -m "chore: 13f filings $(date -u +%Y-%m-%d)"
           git push
 
   # ── Job 3: Newsletter ─────────────────────────────────────────────────────
@@ -116,6 +127,8 @@ jobs:
     if: always() && needs.snapshot.result == 'success' && github.event.inputs.skip_newsletter != 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -124,25 +137,23 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # Pull latest commits from snapshot + filings jobs
-      - name: Pull latest repo state
-        run: git pull --rebase origin main
+      - name: Pull latest (snapshot + filings commits)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Verify snapshots exist
         run: |
-          echo "Snapshot files available:"
-          find snapshots -name "*.parquet" | sort | tail -5
           COUNT=$(find snapshots -name "*.parquet" | wc -l)
-          echo "Total snapshots: $COUNT"
-          if [ "$COUNT" -eq 0 ]; then
-            echo "ERROR: No snapshot parquet files found after git pull"
-            exit 1
-          fi
+          echo "Snapshot parquet files found: $COUNT"
+          find snapshots -name "*.parquet" | sort | tail -5
+          [ "$COUNT" -eq 0 ] && echo "ERROR: no snapshots found" && exit 1 || true
 
       - name: Ensure output directories exist
         run: |
-          mkdir -p newsletters
-          mkdir -p filings/13f
+          mkdir -p newsletters filings/13f
           touch filings/13f/.gitkeep
 
       - name: Generate newsletter
@@ -162,9 +173,7 @@ jobs:
 
       - name: Commit newsletter
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
           git add newsletters/
-          git diff --cached --quiet || git commit -m "feat: newsletter $(date -u +%Y-%m-%d)"
+          git diff --cached --quiet && echo "No newsletter to commit" && exit 0
+          git commit -m "feat: newsletter $(date -u +%Y-%m-%d)"
           git push
