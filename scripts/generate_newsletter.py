@@ -57,9 +57,38 @@ OLLAMA_HEADERS = {
 # ---------------------------------------------------------------------------
 
 def find_snapshots(snapshots_dir: str = "snapshots", n: int = 2) -> list:
+    """
+    Return the N most recent snapshot parquet files.
+    Handles two naming patterns produced by capture_snapshot.py:
+      - snapshots/YYYY/snapshot_YYYY-MM-DD.parquet  (canonical repo copy)
+      - snapshots/geospatial_stocks_snapshot_TIMESTAMP.parquet  (local artifact)
+    """
     root = Path(snapshots_dir)
-    files = sorted(root.rglob("snapshot_*.parquet"))
-    return files[-n:] if len(files) >= n else files
+    if not root.exists():
+        print(f"[newsletter] Snapshots directory '{snapshots_dir}' not found")
+        return []
+
+    # Collect all parquet files recursively, exclude any temp/test files
+    all_files = sorted(root.rglob("*.parquet"))
+
+    # Prefer the canonical dated files (snapshot_YYYY-MM-DD) over timestamped artifacts
+    canonical = [f for f in all_files if re.match(r"snapshot_\d{4}-\d{2}-\d{2}", f.name)]
+    if canonical:
+        files = canonical
+    else:
+        # Fall back to any parquet found (covers the artifact naming pattern)
+        files = all_files
+
+    if not files:
+        print(f"[newsletter] No parquet files found under '{snapshots_dir}/'")
+        # Print what IS in the snapshots dir to help debug
+        existing = list(root.rglob("*"))
+        print(f"[newsletter] Files found in snapshots/: {[str(f) for f in existing[:10]]}")
+        return []
+
+    result = files[-n:]
+    print(f"[newsletter] Found {len(files)} snapshots, using latest {len(result)}: {[f.name for f in result]}")
+    return result
 
 
 def load_snapshot(path: Path) -> pd.DataFrame:
