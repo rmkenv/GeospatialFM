@@ -41,7 +41,12 @@ jobs:
         id: capture
         run: |
           python scripts/capture_snapshot.py
-          LATEST=$(find snapshots -name "*.parquet" | sort | tail -1)
+          # Find the canonical dated snapshot (snapshots/YYYY/snapshot_YYYY-MM-DD.parquet)
+          LATEST=$(find snapshots -name "snapshot_????-??-??.parquet" | sort | tail -1)
+          # Fallback to any parquet if dated pattern not found
+          if [ -z "$LATEST" ]; then
+            LATEST=$(find snapshots -name "*.parquet" | sort | tail -1)
+          fi
           echo "snapshot_path=$LATEST" >> $GITHUB_OUTPUT
           echo "Latest snapshot: $LATEST"
 
@@ -78,7 +83,6 @@ jobs:
       - name: Ensure filings directories exist
         run: |
           mkdir -p filings/13f
-          # Create .gitkeep so git tracks the empty dir if no filings found
           touch filings/13f/.gitkeep
 
       - name: Fetch 13F filings
@@ -100,7 +104,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
-          # Stage filings/ — won't error even if only .gitkeep exists
           git add filings/
           git diff --cached --quiet || git commit -m "chore: 13f filings $(date -u +%Y-%m-%d)"
           git push
@@ -110,7 +113,6 @@ jobs:
     name: "Generate Newsletter"
     runs-on: ubuntu-latest
     needs: [snapshot, filings]
-    # Run even if filings job was skipped; abort only if snapshot failed
     if: always() && needs.snapshot.result == 'success' && github.event.inputs.skip_newsletter != 'true'
     steps:
       - uses: actions/checkout@v4
@@ -122,8 +124,20 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # Pull filings committed by the previous job
-      - run: git pull --rebase origin main
+      # Pull latest commits from snapshot + filings jobs
+      - name: Pull latest repo state
+        run: git pull --rebase origin main
+
+      - name: Verify snapshots exist
+        run: |
+          echo "Snapshot files available:"
+          find snapshots -name "*.parquet" | sort | tail -5
+          COUNT=$(find snapshots -name "*.parquet" | wc -l)
+          echo "Total snapshots: $COUNT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "ERROR: No snapshot parquet files found after git pull"
+            exit 1
+          fi
 
       - name: Ensure output directories exist
         run: |
@@ -136,6 +150,7 @@ jobs:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
         run: |
           python scripts/generate_newsletter.py \
+            --snapshots-dir snapshots \
             --output-dir newsletters \
             --filings-dir filings/13f
 
@@ -150,7 +165,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
-          mkdir -p newsletters
           git add newsletters/
           git diff --cached --quiet || git commit -m "feat: newsletter $(date -u +%Y-%m-%d)"
           git push
