@@ -553,31 +553,20 @@ def main():
         # 4. Create snapshot
         snapshot_df = create_snapshot(company_df, stock_data)
         
-        # 5. Save snapshot to GitHub repository
+        # 5. Save snapshot — git operations handled by the workflow, not here.
+        #    Doing git commit inside the script causes a dirty working tree that
+        #    breaks subsequent jobs' git fetch/reset steps.
         github_filepath = save_snapshot_to_github(snapshot_df)
-        
-        # 6. Commit and push to GitHub
-        github_success = commit_and_push_to_github(github_filepath)
-        
-        # 7. Save local copy for GitHub Actions artifacts
-        local_filepath = save_snapshot_local(snapshot_df)
-        
+
         # Summary
         print("\n" + "=" * 60)
         print("SUMMARY")
         print("=" * 60)
-        print(f"✓ Snapshot created with {len(snapshot_df)} records")
-        print(f"✓ Monthly metrics calculated for {len(stock_data)} stocks")
-        print(f"{'✓' if github_success else '❌'} GitHub storage: {github_filepath}")
-        print(f"✓ Local artifact: {local_filepath}")
+        print(f"\u2713 Snapshot created with {len(snapshot_df)} records")
+        print(f"\u2713 Monthly metrics calculated for {len(stock_data)} stocks")
+        print(f"\u2713 Saved to: {github_filepath}")
         print("=" * 60)
-        
-        if github_success:
-            print("\n✓ Snapshot captured and stored successfully!")
-        else:
-            print("\n⚠ Snapshot captured but GitHub storage failed")
-            sys.exit(1)
-        
+        print("\n\u2713 Snapshot file written. Workflow will commit and push.")
     except Exception as e:
         print(f"\n❌ Error: {str(e)}")
         import traceback
