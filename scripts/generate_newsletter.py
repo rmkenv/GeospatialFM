@@ -72,6 +72,25 @@ def load_snapshot(path: Path) -> pd.DataFrame:
 # Formatting helpers
 # ---------------------------------------------------------------------------
 
+def _normalize_mcap(df: pd.DataFrame) -> pd.Series:
+    """
+    Return a USD-normalized market cap series.
+    yfinance stores non-USD tickers (JPY, HKD, CNY, etc.) in local currency.
+    We fall back to marketCapBillions * 1e9 which yfinance already converts to USD.
+    """
+    if "marketCapBillions" in df.columns:
+        mcap = df["market_cap"].copy()
+        # Non-USD tickers: yfinance stores local-currency market_cap; use USD-converted field
+        if "currency" in df.columns:
+            is_usd = df["currency"].fillna("USD") == "USD"
+            mcap[~is_usd] = df.loc[~is_usd, "marketCapBillions"] * 1e9
+        # Fill any remaining NaN market_cap with marketCapBillions fallback
+        null_mask = mcap.isna()
+        mcap[null_mask] = df.loc[null_mask, "marketCapBillions"] * 1e9
+        return mcap
+    return df["market_cap"]
+
+
 def _fmt_b(val) -> str:
     try:
         v = float(val)
@@ -93,8 +112,9 @@ def _fmt_pct(val) -> str:
 
 def section_executive_summary(df: pd.DataFrame, df_prev: Optional[pd.DataFrame]) -> str:
     total      = len(df)
-    mcap_total = df["market_cap"].sum() if "market_cap" in df else 0
-    mcap_prev  = df_prev["market_cap"].sum() if df_prev is not None and "market_cap" in df_prev else None
+    mcap_col   = _normalize_mcap(df) if "market_cap" in df else pd.Series(dtype=float)
+    mcap_total = mcap_col.sum() if len(mcap_col) else 0
+    mcap_prev  = _normalize_mcap(df_prev).sum() if df_prev is not None and "market_cap" in df_prev else None
 
     gainers = int((df["monthly_pct_change"] > 0).sum()) if "monthly_pct_change" in df else "?"
     losers  = int((df["monthly_pct_change"] < 0).sum()) if "monthly_pct_change" in df else "?"
@@ -122,7 +142,8 @@ def section_market_movers(df: pd.DataFrame) -> str:
     col = "monthly_pct_change"
     if col not in df.columns:
         return ""
-    sub = df[["symbol","companyName","Main Industry","market_cap",col]].dropna(subset=[col])
+    df = df.copy(); df["market_cap"] = _normalize_mcap(df)
+    sub = df[["symbol","companyName","Main Industry","market_cap",col]].dropna(subset=[col,"market_cap"])
 
     def tbl(frame, label):
         rows = [f"**{label}**",
@@ -147,6 +168,8 @@ def section_market_movers(df: pd.DataFrame) -> str:
 def section_mcap_shifts(df: pd.DataFrame, df_prev: Optional[pd.DataFrame]) -> str:
     if df_prev is None or "market_cap" not in df.columns:
         return ""
+    df = df.copy(); df["market_cap"] = _normalize_mcap(df)
+    df_prev = df_prev.copy(); df_prev["market_cap"] = _normalize_mcap(df_prev)
     merged = (
         df[["symbol","companyName","market_cap"]]
         .merge(df_prev[["symbol","market_cap"]], on="symbol", suffixes=("_now","_prev"))
@@ -197,8 +220,8 @@ def section_52_week_watch(df: pd.DataFrame) -> str:
         + tbl(sub.nlargest(6,"pct_from_high"), "fifty_two_week_high", "pct_from_high",
               "Nearest to 52-Week High (momentum)")
         + "\n\n"
-        + tbl(sub.nlargest(6,"pct_from_low"), "fifty_two_week_low", "pct_from_low",
-              "Furthest Above 52-Week Low (recovery)")
+        + tbl(sub.nsmallest(6,"pct_from_low"), "fifty_two_week_low", "pct_from_low",
+              "Closest to 52-Week Low (distressed)")
     )
 
 
@@ -230,6 +253,7 @@ def section_industry_breakdown(df: pd.DataFrame) -> str:
         if len(sub2) == 0: return ""
         return sub2.nlargest(1,"monthly_pct_change")["symbol"].values[0]
 
+    df = df.copy(); df["market_cap"] = _normalize_mcap(df)
     grp = df.groupby("Main Industry").agg(
         companies=("symbol","count"),
         total_mcap=("market_cap","sum"),
@@ -307,9 +331,10 @@ def section_valuation(df: pd.DataFrame) -> str:
 
 def section_fundamentals(df: pd.DataFrame) -> str:
     blocks = ["## 8. Fundamentals Screen"]
+    df = df.copy(); df["market_cap"] = _normalize_mcap(df)
 
     if "returnOnEquityTTM" in df.columns:
-        roe = df[["symbol","companyName","returnOnEquityTTM","Main Industry","market_cap"]].dropna(subset=["returnOnEquityTTM"])
+        roe = df[["symbol","companyName","returnOnEquityTTM","Main Industry","market_cap"]].dropna(subset=["returnOnEquityTTM","market_cap"])
         roe = roe[roe["returnOnEquityTTM"].between(0.01, 10)]
         if len(roe):
             rows = ["**Top Return on Equity (TTM)**",
@@ -325,8 +350,8 @@ def section_fundamentals(df: pd.DataFrame) -> str:
             blocks.append("\n".join(rows))
 
     if "growthRevenue" in df.columns:
-        rev_g = df[["symbol","companyName","growthRevenue","revenue","Main Industry"]].dropna(subset=["growthRevenue"])
-        rev_g = rev_g[rev_g["growthRevenue"].between(-1, 5)]
+        rev_g = df[["symbol","companyName","growthRevenue","revenue","Main Industry","market_cap"]].dropna(subset=["growthRevenue","revenue","market_cap"])
+        rev_g = rev_g[(rev_g["growthRevenue"].between(-1, 5)) & (rev_g["revenue"] > 0)]
         if len(rev_g):
             rows = ["**Fastest Revenue Growth (YoY)**",
                     "| Ticker | Company | Rev Growth | TTM Revenue | Industry |",
@@ -361,6 +386,7 @@ def section_fundamentals(df: pd.DataFrame) -> str:
 def section_geo_exposure(df: pd.DataFrame) -> str:
     if "country_current" not in df.columns:
         return ""
+    df = df.copy(); df["market_cap"] = _normalize_mcap(df)
     grp = df.groupby("country_current").agg(
         companies=("symbol","count"),
         total_mcap=("market_cap","sum"),
