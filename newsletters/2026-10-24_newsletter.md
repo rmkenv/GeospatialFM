@@ -1,0 +1,305 @@
+## 1. Executive Summary  
+- Universe: **1011 companies** across 32 industries, 28 countries  
+- Total market cap: **$44 346.5 B**  
+- WoW market cap change: **-$710.0 B** (-1.6%)  
+- Median weekly return: **+0.5%**  
+- Advances / Declines / Flat: **498 up / 445 down / 3 flat** (0% unchanged)  
+
+**Analysis**  
+The sector has contracted modestly this week, with a 1.6% pullback in aggregate market capitalization reflecting heavier selling in the largest names. Despite the decline, the median weekly return remains positive at 0.5%, underlining that the broadened base is still gaining modest upside. Weakest movers are largely driven by deep snapbacks in the big tech group, while the mid‑cap software cluster continues to deliver incremental gains.  
+
+---
+
+## 2. Market Movers (Weekly)
+
+**Top Gainers**
+| Ticker | Company | Industry | MCap | monthly_pct_change % |
+|--------|---------|----------|------|----------------------|
+| BMBL | Bumble Inc. | Software | $612M | **+129.2%** |
+| GIBO | GIBO Holdings Limited | Internet Content & Inf | $155M | +93.6% |
+| BRZE | Braze, Inc. | Software | $5.2B | +74.5% |
+| BYRN | Byrna Technologies Inc. | Aerospace/Defense | $516M | +45.6% |
+| APPN | Appian Corporation | Software | $3.7B | +43.5% |
+| DXC | DXC Technology Company | Information Technology | $2.6B | +42.1% |
+| HPK | HighPeak Energy, Inc. | Energy | $1.5B | +42.0% |
+| RXO | RXO, Inc. | Trucking | $4.7B | +40.5% |
+
+**Top Losers**
+| Ticker | Company | Industry | MCap | monthly_pct_change % |
+|--------|---------|----------|------|----------------------|
+| GETY | Getty Images Holdings, Inc. | Internet Content & Inf | $8M | **-58.6%** |
+| AIIO | Robo.ai Inc. | Auto | $506M | -56.9% |
+| CABO | Cable One, Inc. | Telecommunications | $27M | -56.6% |
+| WYFI | WhiteFiber, Inc. Ordinary Sh | Information Technology | $388M | -45.0% |
+| UCTT | Ultra Clean Holdings, Inc. | Semiconductors | $2.0B | -44.5% |
+| AEHR | Aehr Test Systems | Semiconductors | $1.8B | -44.5% |
+| INDI | indie Semiconductor, Inc. | Semiconductors | $378M | -44.2% |
+| PSNY | Polestar Automotive Holding  | Auto | $603M | -43.9% |
+
+**Analysis**  
+Software leaders continue to fuel weekly rally, with Bumble and Braze engineering the largest gains, reflecting strong revenue growth and expanding B2C user bases. In contrast, Getty Images is the most volatile of the losers, dropping 58.6% as creative‑content demand wanes and alternative platforms gain traction. The high beta auto names—Robo.ai and Polestar—are under pressure amid macro‑cycle concerns and tightening supply chains.  
+
+---
+
+## 3. Market Cap Shifts (WoW)
+
+**Biggest Dollar Gainers**
+| Ticker | Company | MCap Δ |
+|--------|---------|--------|
+| TSLA | Tesla, Inc. | +70.3B |
+| PANW | Palo Alto Networks, Inc. | +31.5B |
+| CRWD | CrowdStrike Holdings, Inc. | +30.9B |
+| PLTR | Palantir Technologies Inc. | +25.8B |
+| IBM | International Business Machine | +20.9B |
+| NOW | ServiceNow, Inc. | +17.6B |
+
+**Biggest Dollar Losers**
+| Ticker | Company | MCap Δ |
+|--------|---------|--------|
+| GOOGL | Alphabet Inc. | **-249.2B** |
+| GOOG | Alphabet Inc. | -240.1B |
+| META | Meta Platforms, Inc. | -169.9B |
+| NVDA | NVIDIA Corporation | -76.5B |
+| LRCX | Lam Research Corporation | -42.3B |
+| AVGO | Broadcom Inc. | -33.7B |
+
+**Analysis**  
+Tesla’s record‑breaking $70 B jump, spurred by the NVIDIA chip debate, remains the standout gain of the week, while Alphabet suffered a staggering $249 B market‑cap wipeout amid valuation rebalancing and a shift away from corporate advertising. The biggest losers are all giant technology names, signaling a broader correction in the sector’s high‑growth houses.  
+
+---
+
+## 4. 52‑Week Extremes  
+
+**Nearest to 52‑Week High (momentum)**
+| Ticker | Company | Industry | Price | 52wk Ref | % From Ref |
+|--------|---------|----------|-------|----------|------------|
+| ATKR | Atkore Inc. | Electrical Equipme | $94.96 | $94.97 | **-0.0%** |
+| BOX | Box, Inc. | Software | $43.18 | $43.22 | -0.1% |
+| FRSH | Freshworks Inc. | Software | $15.49 | $15.51 | -0.1% |
+| DOCU | DocuSign, Inc. | Software | $85.27 | $85.39 | -0.1% |
+| BRZE | Braze, Inc. | Software | $45.88 | $45.95 | -0.1% |
+| ITGR | Integer Holdings Corpora | Medical | $126.54 | $126.83 | -0.2% |
+
+**Closest to 52‑Week Low (distressed)**
+| Ticker | Company | Industry | Price | 52wk Ref | % From Ref |
+|--------|---------|----------|-------|----------|------------|
+| TMUS | T-Mobile US, Inc. | Telecommunications | $146.54 | $146.32 | +0.2% |
+| TBB | AT&T Inc. 5.35% GLB NTS  | Telecommunications | $17.78 | $17.75 | +0.2% |
+| OPFI | OppFi Inc. | Software | $5.42 | $5.40 | +0.4% |
+| NXDR | Nextdoor Holdings, Inc. | Internet Content & | $2.43 | $2.42 | +0.4% |
+| WYFI | WhiteFiber, Inc. Ordinar | Information Techno | $9.98 | $9.94 | +0.5% |
+| DUKH | Ocean Park High Income E | Regulated Electric | $23.16 | $23.05 | +0.5% |
+
+**Analysis**  
+Atkore’s stock sits on the cusp of its year‑high, signaling robust performance in the electrical equipment niche—a bright spot in an otherwise mixed month. Conversely, T‑Mobile’s slight lift from its lowest point illustrates resilient telecom infrastructure despite sector headwinds. The proximity of these two extremes indicates breadth is contested but not yet directed strongly.  
+
+---
+
+## 5. Multi‑Period Performance Leaders  
+
+**3mo — Top 5 / Bottom 5**  
+| Ticker | Company | Industry | Return |
+|--------|---------|----------|--------|
+| TEAM | Atlassian Corporation | Software | **+137.4%** |
+| APPN | Appian Corporation | Software | +104.9% |
+| BMBL | Bumble Inc. | Software | +101.3% |
+| AMPL | Amplitude, Inc. | Software | +100.9% |
+| BRZE | Braze, Inc. | Software | +95.2% |
+| — | — | — | — |
+| GETY | Getty Images Holdings, Inc | Internet Content & I | -93.0% |
+| CABO | Cable One, Inc. | Telecommunications | -87.8% |
+| AIIO | Robo.ai Inc. | Auto | -81.0% |
+| PSNY | Polestar Automotive Holdin | Auto | -73.9% |
+| THRY | Thryv Holdings, Inc. | Internet Content & I | -71.4% |
+
+**YTD — Top 5 / Bottom 5**  
+| Ticker | Company | Industry | Return |
+|--------|---------|----------|--------|
+| DELL | Dell Technologies Inc. | Hardware | **+260.9%** |
+| MXL | MaxLinear, Inc. | Semiconductors | +242.8% |
+| ATEX | Anterix Inc. | Telecommunications | +236.9% |
+| KOS | Kosmos Energy Ltd. | Energy | +222.5% |
+| BAND | Bandwidth Inc. | Software | +210.7% |
+| — | — | — | — |
+| GETY | Getty Images Holdings, Inc | Internet Content & I | -97.8% |
+| DGNX | Diginex Limited | Software | -96.2% |
+| CABO | Cable One, Inc. | Telecommunications | -95.4% |
+| AIIO | Robo.ai Inc. | Auto | -90.9% |
+| EOSE | Eos Energy Enterprises, In | Electrical Equipment | -86.7% |
+
+**1yr — Top 5 / Bottom 5**  
+| Ticker | Company | Industry | Return |
+|--------|---------|----------|--------|
+| MU | Micron Technology, Inc. | Semiconductors | **+299.2%** |
+| MXL | MaxLinear, Inc. | Semiconductors | +298.4% |
+| LITE | Lumentum Holdings Inc. | Communication Equipm | +290.2% |
+| ATEX | Anterix Inc. | Telecommunications | +267.5% |
+| BFLY | Butterfly Network, Inc. | Medical | +207.3% |
+| — | — | — | — |
+| DGNX | Diginex Limited | Software | -98.9% |
+| GETY | Getty Images Holdings, Inc | Internet Content & I | -98.7% |
+| AIIO | Robo.ai Inc. | Auto | -97.4% |
+| CABO | Cable One, Inc. | Telecommunications | -97.1% |
+| MVST | Microvast Holdings, Inc. | Electrical Equipment | -90.7% |
+
+**Analysis**  
+Software remains the engine of short‑term strength, with Atlassian’s +137% rally underscoring the high‑margin SaaS model. Dell’s YTD double‑digit gains spotlight hardware’s rebound post‑pandemic, while Micron’s 299% 1‑year return cements the semiconductor boom. On the downside, Getty Images, Diginex, and Robo.ai have each posted near‑full loss, reflecting either a misplaced bet or erosion of competitive leverage in high‑priced, high‑risk niches.  
+
+---
+
+## 6. Industry Breakdown  
+
+| Industry | # Co | Total MCap | Median Wkly | Best | Worst |
+|----------|------|------------|-------------|------|-------|
+| Semiconductors | 68 | $11 367.8B | -19.2% | +16.0% | **-44.5%** |
+| Internet Content & Infor | 36 | $10 086.4B | -0.3% | +93.6% | -58.6% |
+| Software | 216 | $8 422.4B | +7.8% | +129.2% | -41.6% |
+| Auto | 41 | $1 717.2B | -4.2% | +13.6% | -56.9% |
+| Aerospace/Defense | 52 | $1 550.4B | -4.9% | +45.6% | -27.3% |
+| Industrial | 79 | $1 490.7B | +0.0% | +24.4% | -40.3% |
+| Regulated Electric | 31 | $1 110.1B | +8.1% | +14.5% | -28.3% |
+| Hardware | 20 | $1 055.5B | **-18.2%** | +11.2% | -38.0% |
+| Energy | 75 | $961.5B | +8.3% | +42.0% | -29.6% |
+| Telecommunications | 32 | $886.1B | -3.8% | +12.2% | -56.6% |
+| Communication Equipment | 27 | $855.6B | -7.0% | +7.8% | -32.9% |
+| Medical | 53 | $806.4B | +3.6% | +14.6% | -26.5% |
+| Information Technology S | 49 | $693.6B | +10.9% | +42.1% | -45.0% |
+| Agricultural | 14 | $594.3B | -5.2% | +2.2% | -15.2% |
+| Railroads | 6 | $391.4B | +4.5% | +9.9% | -4.8% |
+| Construction | 22 | $335.2B | +5.1% | +24.2% | -26.7% |
+| Engineering & Constructi | 25 | $283.0B | -10.3% | +11.9% | -33.5% |
+| Waste Management | 9 | $241.1B | +8.7% | +21.8% | -15.9% |
+| Specialty Business Servi | 19 | $234.3B | +4.8% | +23.3% | -29.8% |
+| Electrical Equipment & P | 21 | $220.9B | -15.7% | +5.3% | -43.1% |
+
+**Analysis**  
+The software segment outperformed the broader universe, with a +7.8% median weekly return and a striking +129.2% titanscale rally. In contrast, hardware lagged, posting -18.2% median weekly and the sector’s worst worst overall at -38.0%. Semiconductors saw the steepest decline in weekly return, illustrating volatility in supply‑chain‑intensive fields amid inflated valuations. The energy, regulated electric, and telecommunication sectors delivered modest gains, highlighting the resilience of utility‑style cash flows.  
+
+---
+
+## 7. Valuation Snapshot  
+
+**P/E Ratios** (n=641): median 25.4x | 25th pct 17.4x | 75th pct 40.2x  
+
+*Lowest P/E (potential value)*
+| Ticker | Company | PE | Industry |
+|--------|---------|-----|----------|
+| LNZA | LanzaTech Global, Inc. | **0.3x** | Waste Management |
+| LYFT | Lyft, Inc. | 2.5x | Software |
+| OPFI | OppFi Inc. | 2.5x | Software |
+| CHTR | Charter Communications, In | 2.8x | Telecommunications |
+| TBB | AT&T Inc. 5.35% GLB NTS 66 | 3.5x | Telecommunications |
+| GSL | Global Ship Lease, Inc. | 4.1x | Marine Shipping |
+
+*Beta* (n=819): median 1.12 | 193 high-beta (>1.5) | 157 low-beta (<0.7)
+
+*Highest Beta*
+| Ticker | Company | Beta | Industry |
+|--------|---------|------|----------|
+| APLD | Applied Digital Corporatio | **6.00** | Information Technolo |
+| PGY | Pagaya Technologies Ltd. | 5.52 | Software |
+| CORZ | Core Scientific, Inc. | 5.48 | Software |
+| NNE | Nano Nuclear Energy Inc | 5.48 | Industrial |
+| DJT | Trump Media & Technology G | 4.10 | Internet Content & I |
+
+*Dividend Payers*: 384 companies | median yield 1.50%
+
+*Highest Yielders*
+| Ticker | Company | Yield | Industry |
+|--------|---------|-------|----------|
+| PLTK | Playtika Holding Corp. | **19.3%** | Media |
+| MNR | Mach Natural Resources LP | 16.6% | Energy |
+| NAT | Nordic American Tankers Li | 13.7% | Marine Shipping |
+| HAFN | Hafnia Limited | 10.6% | Marine Shipping |
+| DMLP | Dorchester Minerals, L.P. | 10.4% | Energy |
+| BWLP | BW LPG Limited | 10.1% | Marine Shipping |
+
+**Analysis**  
+The market’s valuation range is broad: the median P/E of 25.4x sits squarely in the high‑growth zone, yet the extreme low at 0.3x for LanzaTech signals attractive contrarian opportunities in niche waste‑tech. Beta statistics reveal a sizable dispersion, with Applied Digital’s 6.0 indicating high volatility that could translate to outsized weekly swings. Dividend yield leaders, largely in media and shipping, reflect pure‑playing sectors that may provide a hedge against equity risk.  
+
+---  
+
+## 8. Fundamentals Screen  
+
+**Top Return on Equity (TTM)**
+| Ticker | Company | ROE | Industry | MCap |
+|--------|---------|-----|----------|------|
+| SBR | Sabine Royalty Trust | **866.8%** | Energy | $1.1B |
+| VRSK | Verisk Analytics, Inc. | 439.1% | Consulting Services | $25.7B |
+| RZLVW | Rezolve AI Limited Warrant | 348.1% | Software | $2.4B |
+| RZLV | Rezolve AI PLC | 348.1% | Software | $613M |
+| BZAIW | Blaize Holdings, Inc. | 289.6% | Software | $440M |
+| APP | AppLovin Corporation | 257.7% | Software | $87.1B |
+| EAF | GrafTech International Ltd | 234.2% | Electrical Equipment | $222M |
+| GDDY | GoDaddy Inc. | 195.7% | Software | $14.3B |
+
+**Fastest Revenue Growth (YoY)**
+| Ticker | Company | Rev Growth | TTM Revenue | Industry |
+|--------|---------|------------|-------------|----------|
+| NBIS | Nebius Group N.V. | **+459.6%** | $117M | Internet Content & I |
+| BBNX | Beta Bionics, Inc. | +442.9% | $65M | Medical |
+| EAI | Entergy Arkansas, Inc. 1M  | +348.9% | $11.9B | Regulated Electric |
+| BKKT | Bakkt Holdings, Inc. | +347.4% | $3.5B | Software |
+| DRO.AX | DroneShield Ltd | +285.0% | $67M | Aerospace/Defense |
+| SSII | SS Innovations Internation | +251.2% | $21M | Medical |
+| ALAB | Astera Labs, Inc. Common S | +242.2% | $396M | Semiconductors |
+| ENVX | Enovix Corporation | +201.9% | $23M | Electrical Equipment |
+
+**Most Profitable (Net Income TTM)**
+| Ticker | Company | Net Income | Industry |
+|--------|---------|------------|----------|
+| MSFT | Microsoft Corporation | **$101.8B** | Software |
+| GOOG | Alphabet Inc. | $100.1B | Internet Content & I |
+| GOOGL | Alphabet Inc. | $100.1B | Internet Content & I |
+| NVDA | NVIDIA Corporation | $72.9B | Semiconductors |
+| META | Meta Platforms, Inc. | $62.4B | Internet Content & I |
+| 0700.HK | Tencent Holdings Ltd | $18.9B | Internet Content & I |
+
+**Analysis**  
+Sabine Royalty Trust’s 866% ROE highlights the high‑leveraged, asset‑heavy nature of energy royalties, while the digital scale of Microsoft remains unmatched with $101.8 B net income. The revenue growth crowd, dominated by Nebius and Beta Bionics, underscores a premium in high‑growth tech sub‑segments, though companies with lower maturity are more volatile and risk‑laden.  
+
+---  
+
+## 9. Geographic Exposure  
+
+| Country | # Co | Total MCap | Median Weekly |
+|---------|------|------------|---------------|
+| United States | 744 | $40 868.3B | +1.6% |
+| Ireland | 9 | $690.1B | +3.3% |
+| China | 6 | $405.2B | **-10.0%** |
+| Canada | 11 | $360.7B | +12.3% |
+| United Kingdom | 15 | $321.0B | +2.5% |
+| Singapore | 7 | $174.1B | -10.3% |
+| Germany | 1 | $120.0B | +nan% |
+| Netherlands | 4 | $111.8B | -1.6% |
+| Japan | 1 | $110.0B | +11.2% |
+| Switzerland | 5 | $86.1B | -0.7% |
+| Israel | 17 | $61.6B | -0.3% |
+| Australia | 2 | $60.1B | +2.9% |
+
+**Analysis**  
+The U.S. dominates by market out‑size and positive momentum (+1.6% median weekly). Canada and Japan present the best weekly gains, outperforming the U.S. by 12.3% and 11.2% respectively, indicating stronger regional tailwinds. China and Singapore lag sharply, both down over 10% amid regulatory headwinds, trimming sector exposure in those markets.  
+
+---  
+
+## 10. 13F Institutional Watch  
+_No 13F filing data available this week._
+
+**Analysis**  
+The absence of 13F updates limits our ability to gauge top‑tier institutional positions. Investors should monitor next cycle for changes in holdings that may signal broader institutional confidence.  
+
+---  
+
+## 11. Trend Signal  
+
+- **Price vs 3mo Average**: 391/945 (41%) stocks above their 3‑month average — breadth is **neutral**  
+- **3mo Volatility**: median 3.19 | top decile 21.67  
+- **YTD Scorecard**: 523 positive / 422 negative | median YTD +3.4%  
+- **5yr Median Return**: +17.5% across 945 companies with full history  
+
+**Analysis**  
+The 41% breadth indicates modest conviction but no commanding trend, while the high top decile volatility suggests that the sector is more explosive than average. A positive YTD+3.4% median underlines ongoing upside, but the 5‑year median return of 17.5% is characteristic of a steady but not spectacular performer.  
+
+---  
+
+**📌 Data Note** – All figures are based on the latest 2026‑10‑24 GeospatialFM database snapshot, aggregated weekly and computed as of 10:00 UTC.
